@@ -10,7 +10,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableFeignClients
 @EnableEurekaClient
-@EntityScan({"com.galileo.cu.commons.models"})
+@EntityScan({ "com.galileo.cu.commons.models" })
 public class ServicioObjetivosApplication implements CommandLineRunner {
 
 	public static void main(String[] args) {
@@ -20,7 +20,7 @@ public class ServicioObjetivosApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		System.out.println("**************************************");
-		System.out.println("Objetivos V-0617-15:11");
+		System.out.println("Objetivos V-2408290417");
 	}
 
 }
