@@ -126,7 +126,9 @@ public class ObjetivosInterceptor implements HandlerInterceptor {
 		if (isTraccarInserted && !handleBD && !ex.getMessage().contains("constraint [uk_descripcion_idOperacion]")
 				&& !ex.getMessage().contains("ya existe")) {
 			try {
+				log.info("Iniciando el Rollback por fallo al insertar objetivo en la bd.");
 				traccar.borrar(objs);
+				log.info("Finalizado el Rollback por fallo al insertar objetivo en la bd.");
 			} catch (Exception e) {
 				String err = "Fallo eliminando grupo en traccar, ejecutando el rollback por fallo al insertar el objetivo en la bd.";
 				log.error("{} : {}", err, e.getMessage());
