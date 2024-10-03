@@ -123,7 +123,8 @@ public class ObjetivosInterceptor implements HandlerInterceptor {
 				? (boolean) request.getAttribute("isTraccarInserted")
 				: false;
 
-		if (isTraccarInserted && !handleBD) {
+		if (isTraccarInserted && !handleBD && !ex.getMessage().contains("constraint [uk_descripcion_idOperacion]")
+				&& !ex.getMessage().contains("ya existe")) {
 			try {
 				traccar.borrar(objs);
 			} catch (Exception e) {
