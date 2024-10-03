@@ -40,6 +40,7 @@ import com.galileo.cu.objetivos.repositorio.ObjetivosRepository;
 import com.galileo.cu.objetivos.repositorio.OperacionesRepository;
 import com.galileo.cu.objetivos.repositorio.PermisosRepository;
 import com.galileo.cu.objetivos.repositorio.TrazasRepository;
+import com.google.common.base.Strings;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -87,6 +88,12 @@ public class ObjetivosEventHandler {
 
 	@HandleBeforeCreate
 	public void handleObjetivosCreate(Objetivos obj) {
+		this.req.setAttribute("handleBD", false);
+		this.req.setAttribute("handleBeforeCreate", false);
+		this.req.setAttribute("handleAfterCreate", false);
+		this.req.setAttribute("isTraccarInserted", false);
+		this.req.setAttribute("objetivo", obj);
+
 		try {
 			log.info("SERVICIO OBJETIVOS EJECUTANDO HandleBeforeCreate");
 			if (obj.getBalizas() != null) {
@@ -112,14 +119,20 @@ public class ObjetivosEventHandler {
 		try {
 			Objetivos objetivoUpdate = traccar.salvar(obj);
 			obj.setTraccarID(objetivoUpdate.getTraccarID());
+			this.req.setAttribute("isTraccarInserted", true);
 		} catch (Exception e) {
-			System.out.println("Fallo al Insertar Objetivo en el Traccar " + e.getMessage());
+			log.error("Fallo al Insertar Objetivo en el Traccar " + e.getMessage());
 			throw new RuntimeException("Fallo al Insertar Objetivo en el Traccar ");
 		}
+
+		this.req.setAttribute("handleBeforeCreate", true);
+		if (!Strings.isNullOrEmpty(obj.getDescripcion()) && obj.getDescripcion().equals("BDFail"))
+			throw new RuntimeException("Fallo insertando objetivo en la bd.");
 	}
 
 	@HandleAfterCreate
 	public void handleObjetivosAfterCreate(Objetivos obj) {
+		this.req.setAttribute("handleBD", true);
 		/* Validando Autorización */
 		// ValidateAuthorization val = new ValidateAuthorization();
 		// try {
@@ -185,6 +198,7 @@ public class ObjetivosEventHandler {
 		// Objetivo: " + obj.getDescripcion(),
 		// "Fallo Insertando la Creación del Objetivo: " + obj.getDescripcion() + " en
 		// la Trazabilidad");
+		this.req.setAttribute("handleAfterCreate", true);
 	}
 
 	@HandleBeforeSave

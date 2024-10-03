@@ -1,6 +1,8 @@
 package com.galileo.cu.objetivos.interceptores;
 
+import com.galileo.cu.commons.models.Objetivos;
 import com.galileo.cu.commons.models.dto.JwtObjectMap;
+import com.galileo.cu.objetivos.cliente.TraccarFeign;
 
 import java.io.IOException;
 
@@ -20,51 +22,51 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class ObjetivosInterceptor implements HandlerInterceptor {
 
 	@Autowired
 	private ObjectMapper objectMapper;
-	
+
+	@Autowired
+	private TraccarFeign traccar;
+
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws ServletException, IOException {
 		System.out.println("INTERCEPTOR***" + request.getMethod() + "*******************");
-		/*Enumeration<String> names = request.getHeaderNames();
-		while (names.hasMoreElements())
-			System.out.println(names.nextElement());*/
+		/*
+		 * Enumeration<String> names = request.getHeaderNames();
+		 * while (names.hasMoreElements())
+		 * System.out.println(names.nextElement());
+		 */
 
 		System.out.println(request.getHeader("Authorization"));
 		if (request.getMethod().equals("GET")) {
 			if (!Strings.isNullOrEmpty(request.getHeader("Authorization"))) {
 				String token = request.getHeader("Authorization").replace("Bearer ", "");
-				System.out.println(token.toString());
-				
+
 				try {
 					String[] chunks = token.split("\\.");
 					Base64.Decoder decoder = Base64.getUrlDecoder();
 					String header = new String(decoder.decode(chunks[0]));
 					String payload = new String(decoder.decode(chunks[1]));
 
-					System.out.println(payload.toString());
-
 					JwtObjectMap jwtObjectMap = objectMapper.readValue(payload.toString().replace("Perfil", "perfil"),
 							JwtObjectMap.class);
-					System.out.println(jwtObjectMap.getId());
 
-					System.out.println("Path:" + request.getRequestURI());
-					System.out.println("Descripcion:" + jwtObjectMap.getPerfil().getDescripcion());
 					if ((request.getRequestURI().equals("/listar/search/filtro")
 							|| request.getRequestURI().equals("/listar/search/filtrarPorUsuario")
 							|| request.getRequestURI().equals("/listar/search/dispositivo"))
 							&& (jwtObjectMap.getPerfil().getDescripcion().equals("Usuario Final")
 									|| jwtObjectMap.getPerfil().getDescripcion().equals("Invitado Externo"))) {
-						System.out.println("-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*");
-						System.out.println("id parametro: " + request.getParameter("idAuth"));
 						if (jwtObjectMap.getId().equals(request.getParameter("idAuth"))) {
 							return true;
 						} else {
-							System.out.println("EL USUARIO ENVIADO NO COINCIDE CON EL AUTENTICADO");
+							log.error("EL USUARIO ENVIADO NO COINCIDE CON EL AUTENTICADO");
 							response.resetBuffer();
 							response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 							response.setHeader("Content-Type", "application/json;charset=UTF-8");
@@ -77,7 +79,7 @@ public class ObjetivosInterceptor implements HandlerInterceptor {
 						}
 					}
 				} catch (Exception e) {
-					System.out.println("NO HAY TOKEN");
+					log.error("NO HAY TOKEN");
 					response.resetBuffer();
 					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 					response.setHeader("Content-Type", "application/json;charset=UTF-8");
@@ -89,11 +91,12 @@ public class ObjetivosInterceptor implements HandlerInterceptor {
 				}
 
 			} else {
-				System.out.println("NO HAY TOKEN");
+				log.error("NO HAY TOKEN");
 				response.resetBuffer();
 				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 				response.setHeader("Content-Type", "application/json;charset=UTF-8");
-				String s="{\"errorMessage\":\"Necesita enviar un Token Válido "+request.getMethod()+" Servicio-Objetivos!\"}";
+				String s = "{\"errorMessage\":\"Necesita enviar un Token Válido " + request.getMethod()
+						+ " Servicio-Objetivos!\"}";
 				response.getOutputStream().write(s.getBytes("UTF-8"));
 				response.flushBuffer();
 
@@ -102,5 +105,31 @@ public class ObjetivosInterceptor implements HandlerInterceptor {
 		}
 
 		return true;// HandlerInterceptor.super.preHandle(request, response, handler);
+	}
+
+	@Override
+	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+			throws Exception {
+		Objetivos objs = (Objetivos) request.getAttribute("objetivo");
+		boolean handleBeforeCreate = request.getAttribute("handleBeforeCreate") != null
+				? (boolean) request.getAttribute("handleBeforeCreate")
+				: false;
+		boolean handleAfterCreate = request.getAttribute("handleAfterCreate") != null
+				? (boolean) request.getAttribute("handleAfterCreate")
+				: false;
+		boolean handleBD = request.getAttribute("handleBD") != null ? (boolean) request.getAttribute("handleBD")
+				: false;
+		boolean isTraccarInserted = request.getAttribute("isTraccarInserted") != null
+				? (boolean) request.getAttribute("isTraccarInserted")
+				: false;
+
+		if (isTraccarInserted && !handleBD) {
+			try {
+				traccar.borrar(objs);
+			} catch (Exception e) {
+				String err = "Fallo eliminando grupo en traccar, ejecutando el rollback por fallo al insertar el objetivo en la bd.";
+				log.error("{} : {}", err, e.getMessage());
+			}
+		}
 	}
 }
