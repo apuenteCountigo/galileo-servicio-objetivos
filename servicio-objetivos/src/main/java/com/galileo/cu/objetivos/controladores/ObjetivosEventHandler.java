@@ -41,6 +41,9 @@ import com.galileo.cu.objetivos.repositorio.OperacionesRepository;
 import com.galileo.cu.objetivos.repositorio.PermisosRepository;
 import com.galileo.cu.objetivos.repositorio.TrazasRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 @RepositoryEventHandler(Obj.class)
 public class ObjetivosEventHandler {
@@ -85,19 +88,18 @@ public class ObjetivosEventHandler {
 	@HandleBeforeCreate
 	public void handleObjetivosCreate(Objetivos obj) {
 		try {
-			System.out.println("SERVICIO OBJETIVOS EJECUTANDO HandleBeforeCreate");
+			log.info("SERVICIO OBJETIVOS EJECUTANDO HandleBeforeCreate");
 			if (obj.getBalizas() != null) {
 				Balizas be = balizasRepository.findById(obj.getBalizas().getId()).get();
-				System.out.println("Validando Baliza Operativa: " + be.toString());
+				log.info("Validando Baliza Operativa: " + be.toString());
 				String est = be.getEstados().getDescripcion();
 				if (est.equals("Operativa") || est.equals("En Instalación")) {
-					System.out.println("Fallo La Baliza está en Uso");
+					log.error("Fallo La Baliza está en Uso");
 					throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "01", null);
 				}
-
 			}
 		} catch (Exception e) {
-			System.out.println("Fallo handleObjetivosCreate " + e.getMessage());
+			log.error("Fallo handleObjetivosCreate " + e.getMessage());
 			if (e.getMessage().equals("500 INTERNAL_SERVER_ERROR \"01\"")) {
 				throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "La Baliza está en Uso",
 						null);
@@ -119,18 +121,20 @@ public class ObjetivosEventHandler {
 	@HandleAfterCreate
 	public void handleObjetivosAfterCreate(Objetivos obj) {
 		/* Validando Autorización */
-//		ValidateAuthorization val = new ValidateAuthorization();
-//		try {
-//			System.out.println("REQUEST HandleAfterCreate: " + req.getMethod());
-//			val.setObjectMapper(objectMapper);
-//			val.setReq(req);
-//			if (!val.Validate()) {
-//				throw new RuntimeException("Fallo de Autorización");
-//			}
-//		} catch (Exception e) {
-//			System.out.println("Fallo Despues de Crear Objetivo Validando Autorización: " + e.getMessage());
-//			throw new RuntimeException("Fallo Despues de Crear Objetivo Validando Autorización: ");
-//		}
+		// ValidateAuthorization val = new ValidateAuthorization();
+		// try {
+		// System.out.println("REQUEST HandleAfterCreate: " + req.getMethod());
+		// val.setObjectMapper(objectMapper);
+		// val.setReq(req);
+		// if (!val.Validate()) {
+		// throw new RuntimeException("Fallo de Autorización");
+		// }
+		// } catch (Exception e) {
+		// System.out.println("Fallo Despues de Crear Objetivo Validando Autorización: "
+		// + e.getMessage());
+		// throw new RuntimeException("Fallo Despues de Crear Objetivo Validando
+		// Autorización: ");
+		// }
 
 		// Cambio de Estado de Baliza Asignada
 		try {
@@ -139,23 +143,25 @@ public class ObjetivosEventHandler {
 				b.setEstados(estadosrepo.findByDescripcion("En Instalación"));
 				b.setFechaAsignaOp(LocalDateTime.now());
 				Operaciones op = opRepo.findById(obj.getOperaciones().getId()).get();
-				System.out.println("Baliza "+b.getClave()+" con Operación "+op.getDescripcion());
+				log.info("Baliza " + b.getClave() + " con Operación " + op.getDescripcion());
 				b.setOperacion(op.getDescripcion());
-				System.out.println("Baliza "+b.getClave()+" con Objetivo "+obj.getDescripcion());
+				log.info("Baliza " + b.getClave() + " con Objetivo " + obj.getDescripcion());
 				b.setObjetivo(obj.getDescripcion());
 				balizasRepository.save(b);
 
-//				ActualizarTrazaObjetivo(val, (int) b.getId(), 3, 3, "Fue Asignada la Baliza: " + b.getClave(),
-//						"Fallo Insertando la Asignación de Baliza al Objetivo: " + obj.getDescripcion()
-//								+ " en la Trazabilidad");
+				// ActualizarTrazaObjetivo(val, (int) b.getId(), 3, 3, "Fue Asignada la Baliza:
+				// " + b.getClave(),
+				// "Fallo Insertando la Asignación de Baliza al Objetivo: " +
+				// obj.getDescripcion()
+				// + " en la Trazabilidad");
 			}
 		} catch (Exception e) {
-			System.out.println("Fallo Actualizando Estado de Baliza al Crear Objetivo " + e.getMessage());
+			log.error("Fallo Actualizando Estado de Baliza al Crear Objetivo " + e.getMessage());
 			throw new RuntimeException("Fallo Actualizando Estado de Baliza al Crear Objetivo ");
 		}
 
 		try {
-			System.out.println("antes de crear HistoricoObjetivosBalizas");
+			log.info("antes de crear HistoricoObjetivosBalizas");
 			if (obj.getBalizas() != null) {
 				HistoricoObjetivosBalizas historico = new HistoricoObjetivosBalizas();
 				// Optional<Balizas> b=balizasRepository.findById(obj.getBalizas().getId());
@@ -171,29 +177,33 @@ public class ObjetivosEventHandler {
 				histObjBalRepo.save(historico);
 			}
 		} catch (Exception e) {
-			System.out.println("Fallo al insertar en HistoricoObjetivosBalizas " + e.getMessage());
+			log.error("Fallo al insertar en HistoricoObjetivosBalizas " + e.getMessage());
 			throw new RuntimeException("Fallo al insertar en HistoricoObjetivosBalizas");
 		}
 
-//		ActualizarTrazaObjetivo(val, obj.getId().intValue(), 8, 1, "Fue Creado el Objetivo: " + obj.getDescripcion(),
-//				"Fallo Insertando la Creación del Objetivo: " + obj.getDescripcion() + " en la Trazabilidad");
+		// ActualizarTrazaObjetivo(val, obj.getId().intValue(), 8, 1, "Fue Creado el
+		// Objetivo: " + obj.getDescripcion(),
+		// "Fallo Insertando la Creación del Objetivo: " + obj.getDescripcion() + " en
+		// la Trazabilidad");
 	}
 
 	@HandleBeforeSave
 	public void handleObjetivosSave(Objetivos obj) {
 		/* Validando Autorización */
-//		ValidateAuthorization val = new ValidateAuthorization();
-//		try {
-//			System.out.println("REQUEST HandleBeforeSave: " + req.getMethod());
-//			val.setObjectMapper(objectMapper);
-//			val.setReq(req);
-//			if (!val.Validate()) {
-//				throw new RuntimeException("Fallo de Autorización");
-//			}
-//		} catch (Exception e) {
-//			System.out.println("Fallo Antes de Actualizar Objetivo Validando Autorización: " + e.getMessage());
-//			throw new RuntimeException("Fallo Antes de Actualizar Objetivo Validando Autorización: ");
-//		}
+		// ValidateAuthorization val = new ValidateAuthorization();
+		// try {
+		// System.out.println("REQUEST HandleBeforeSave: " + req.getMethod());
+		// val.setObjectMapper(objectMapper);
+		// val.setReq(req);
+		// if (!val.Validate()) {
+		// throw new RuntimeException("Fallo de Autorización");
+		// }
+		// } catch (Exception e) {
+		// System.out.println("Fallo Antes de Actualizar Objetivo Validando
+		// Autorización: " + e.getMessage());
+		// throw new RuntimeException("Fallo Antes de Actualizar Objetivo Validando
+		// Autorización: ");
+		// }
 
 		entMg.detach(obj);
 
@@ -224,14 +234,14 @@ public class ObjetivosEventHandler {
 
 		if (obj != null && obj.getBalizas() != null) {
 			Balizas b = balizasRepository.findById(obj.getBalizas().getId()).get();
-			Balizas bTmp=b;
+			Balizas bTmp = b;
 			long bEstado = b.getEstados().getId();
 			b.setEstados(estadosrepo.findByDescripcion("En Instalación"));
 			b.setFechaAsignaOp(LocalDateTime.now());
 			Operaciones op = opRepo.findById(obj.getOperaciones().getId()).get();
-			System.out.println("Baliza "+b.getClave()+" con Operación "+op.getDescripcion());
+			System.out.println("Baliza " + b.getClave() + " con Operación " + op.getDescripcion());
 			b.setOperacion(op.getDescripcion());
-			System.out.println("Baliza "+b.getClave()+" con Objetivo "+obj.getDescripcion());
+			System.out.println("Baliza " + b.getClave() + " con Objetivo " + obj.getDescripcion());
 			b.setObjetivo(obj.getDescripcion());
 			try {
 				balizasRepository.save(b);
@@ -261,7 +271,7 @@ public class ObjetivosEventHandler {
 			idBalizaTmp = objTmp.getBalizas().getId();
 
 			Balizas bOld = balizasRepository.findById(objTmp.getBalizas().getId()).get();
-			Balizas bOldTmp=bOld;
+			Balizas bOldTmp = bOld;
 			// Desasignando Baliza
 			bOld.setEstados(estadosrepo.findByDescripcion("Disponible en Unidad"));
 			bOld.setOperacion(null);
