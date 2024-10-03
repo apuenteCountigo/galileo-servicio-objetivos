@@ -123,8 +123,7 @@ public class ObjetivosInterceptor implements HandlerInterceptor {
 				? (boolean) request.getAttribute("isTraccarInserted")
 				: false;
 
-		if (isTraccarInserted && !handleBD && !ex.getMessage().contains("constraint [uk_descripcion_idOperacion]")
-				&& !ex.getMessage().contains("ya existe")) {
+		if (isTraccarInserted && !handleBD) {
 			try {
 				log.info("Iniciando el Rollback por fallo al insertar objetivo en la bd.");
 				traccar.borrar(objs);
