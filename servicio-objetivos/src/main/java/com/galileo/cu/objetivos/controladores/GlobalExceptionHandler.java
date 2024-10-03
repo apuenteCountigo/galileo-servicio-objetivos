@@ -16,7 +16,7 @@ public class GlobalExceptionHandler {
             return new ResponseEntity<>("{\"message\":\"" + ex.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
         } else if (ex.getMessage().contains("could not execute statement;")) {
             if (ex.getMessage().contains("constraint [uk_descripcion_idOperacion];")) {
-                String err = "{\"message\":\"Fallo, ya existe un objetivo con este nombre, en esta unidad.\"}";
+                String err = "{\"message\":\"Fallo, ya existe un objetivo con este nombre, en esta operación.\"}";
                 log.error(err, ex);
                 return new ResponseEntity<>(err, HttpStatus.INTERNAL_SERVER_ERROR);
             }
