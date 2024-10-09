@@ -123,15 +123,16 @@ public class ObjetivosInterceptor implements HandlerInterceptor {
 				? (boolean) request.getAttribute("isTraccarInserted")
 				: false;
 
-		if (isTraccarInserted && !handleBD) {
-			try {
-				log.info("Iniciando el Rollback por fallo al insertar objetivo en la bd.");
-				traccar.borrar(objs);
-				log.info("Finalizado el Rollback por fallo al insertar objetivo en la bd.");
-			} catch (Exception e) {
-				String err = "Fallo eliminando grupo en traccar, ejecutando el rollback por fallo al insertar el objetivo en la bd.";
-				log.error("{} : {}", err, e.getMessage());
-			}
-		}
+		// if (isTraccarInserted && !handleBD) {
+		// try {
+		// log.info("Iniciando el Rollback por fallo al insertar objetivo en la bd.");
+		// traccar.borrar(objs);
+		// log.info("Finalizado el Rollback por fallo al insertar objetivo en la bd.");
+		// } catch (Exception e) {
+		// String err = "Fallo eliminando grupo en traccar, ejecutando el rollback por
+		// fallo al insertar el objetivo en la bd.";
+		// log.error("{} : {}", err, e.getMessage());
+		// }
+		// }
 	}
 }
