@@ -403,6 +403,18 @@ public class ObjetivosEventHandler {
 		}
 
 		try {
+			long traccarID = objetivosrepo.findById(objetivo.getId()).get().getTraccarID();
+			objetivo.setTraccarID(traccarID);
+		} catch (Exception e) {
+			String err = "Fallo, obteniendo id de traccar";
+			log.error("{}: {}", err, e.getMessage());
+			if (e.getMessage().contains(".getTraccarID()\" is null")) {
+				objetivo.setTraccarID((long) 0);
+			}
+			throw new RuntimeException(err);
+		}
+
+		try {
 			traccar.borrar(objetivo);
 		} catch (Exception e) {
 			System.out.println("Fallo Eliminando Objetivo en las APIS");
