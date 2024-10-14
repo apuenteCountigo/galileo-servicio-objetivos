@@ -222,6 +222,15 @@ public class ObjetivosEventHandler {
 		entMg.detach(obj);
 
 		try {
+			long traccarID = objetivosrepo.findById(obj.getId()).get().getTraccarID();
+			obj.setTraccarID(traccarID);
+		} catch (Exception e) {
+			String err = "Fallo, obteniendo id de traccar";
+			log.error(err, e.getMessage());
+			throw new RuntimeException(err);
+		}
+
+		try {
 			if (obj.getBalizas() != null) {
 				Balizas be = balizasRepository.findById(obj.getBalizas().getId()).get();
 				System.out.println("Validando Baliza Operativa: " + be.toString());
