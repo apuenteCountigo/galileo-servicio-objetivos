@@ -410,8 +410,8 @@ public class ObjetivosEventHandler {
 			log.error("{}: {}", err, e.getMessage());
 			if (e.getMessage().contains(".getTraccarID()\" is null")) {
 				objetivo.setTraccarID((long) 0);
-			}
-			throw new RuntimeException(err);
+			} else
+				throw new RuntimeException(err);
 		}
 
 		try {
