@@ -37,14 +37,12 @@ public class ObjetivosInterceptor implements HandlerInterceptor {
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws ServletException, IOException {
-		System.out.println("INTERCEPTOR***" + request.getMethod() + "*******************");
 		/*
 		 * Enumeration<String> names = request.getHeaderNames();
 		 * while (names.hasMoreElements())
 		 * System.out.println(names.nextElement());
 		 */
 
-		System.out.println(request.getHeader("Authorization"));
 		if (request.getMethod().equals("GET")) {
 			if (!Strings.isNullOrEmpty(request.getHeader("Authorization"))) {
 				String token = request.getHeader("Authorization").replace("Bearer ", "");
