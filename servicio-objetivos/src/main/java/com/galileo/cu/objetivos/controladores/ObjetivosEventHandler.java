@@ -227,6 +227,9 @@ public class ObjetivosEventHandler {
 		} catch (Exception e) {
 			String err = "Fallo, obteniendo id de traccar";
 			log.error("{}: {}", err, e.getMessage());
+			if (e.getMessage().contains(".getTraccarID()\" is null")) {
+				err = "Fallo, el objetivo no tiene id de traccar, consulte a un administrador para solucionarlo";
+			}
 			throw new RuntimeException(err);
 		}
 
