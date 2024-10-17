@@ -258,9 +258,12 @@ public class ObjetivosEventHandler {
 			}
 		}
 
+		Balizas b = new Balizas();
+		Balizas bTmp = new Balizas();
+
 		if (obj != null && obj.getBalizas() != null) {
-			Balizas b = balizasRepository.findById(obj.getBalizas().getId()).get();
-			Balizas bTmp = balizasRepository.findById(obj.getBalizas().getId()).get();
+			b = balizasRepository.findById(obj.getBalizas().getId()).get();
+			bTmp = balizasRepository.findById(obj.getBalizas().getId()).get();
 			long bEstado = b.getEstados().getId();
 			b.setEstados(estadosrepo.findByDescripcion("En Instalación"));
 			b.setFechaAsignaOp(LocalDateTime.now());
