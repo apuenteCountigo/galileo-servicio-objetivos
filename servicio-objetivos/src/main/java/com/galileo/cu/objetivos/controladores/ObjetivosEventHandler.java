@@ -282,6 +282,7 @@ public class ObjetivosEventHandler {
 			try {
 				traccar.cambiarEstado(b);
 			} catch (Exception e) {
+				log.info("Retornando baliza nueva: ", bTmp.toString());
 				balizasRepository.save(bTmp);
 				System.out.println("Fallo Cambiando el Estado de la Baliza: " + b.getClave() + " en Dataminer: "
 						+ e.getMessage());
