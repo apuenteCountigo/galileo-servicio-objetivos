@@ -264,6 +264,7 @@ public class ObjetivosEventHandler {
 		if (obj != null && obj.getBalizas() != null) {
 			b = balizasRepository.findById(obj.getBalizas().getId()).get();
 			bTmp = balizasRepository.findById(obj.getBalizas().getId()).get();
+			log.info("Cargando baliza Tmp: {}", bTmp.getEstados().getDescripcion());
 			long bEstado = b.getEstados().getId();
 			b.setEstados(estadosrepo.findByDescripcion("En Instalación"));
 			b.setFechaAsignaOp(LocalDateTime.now());
@@ -285,7 +286,7 @@ public class ObjetivosEventHandler {
 			try {
 				traccar.cambiarEstado(b);
 			} catch (Exception e) {
-				log.info("Retornando baliza nueva: ", bTmp.toString());
+				log.info("Retornando baliza nueva: {}", bTmp.getEstados().getDescripcion());
 				balizasRepository.save(bTmp);
 				System.out.println("Fallo Cambiando el Estado de la Baliza: " + b.getClave() + " en Dataminer: "
 						+ e.getMessage());
