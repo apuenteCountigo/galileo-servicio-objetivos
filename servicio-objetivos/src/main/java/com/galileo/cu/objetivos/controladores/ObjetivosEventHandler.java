@@ -225,7 +225,7 @@ public class ObjetivosEventHandler {
 			long traccarID = objetivosrepo.findById(obj.getId()).get().getTraccarID();
 			obj.setTraccarID(traccarID);
 		} catch (Exception e) {
-			String err = "Fallo, obteniendo id de traccar";
+			String err = "Fallo, obteniendo id de traccar en la bd";
 			log.error("{}: {}", err, e.getMessage());
 			if (e.getMessage().contains(".getTraccarID()\" is null")) {
 				err = "Fallo, el objetivo no tiene id de traccar, consulte a un administrador para solucionarlo";
@@ -260,7 +260,7 @@ public class ObjetivosEventHandler {
 
 		if (obj != null && obj.getBalizas() != null) {
 			Balizas b = balizasRepository.findById(obj.getBalizas().getId()).get();
-			Balizas bTmp = b;
+			Balizas bTmp = balizasRepository.findById(obj.getBalizas().getId()).get();
 			long bEstado = b.getEstados().getId();
 			b.setEstados(estadosrepo.findByDescripcion("En Instalación"));
 			b.setFechaAsignaOp(LocalDateTime.now());
@@ -269,6 +269,7 @@ public class ObjetivosEventHandler {
 			b.setOperacion(op.getDescripcion());
 			System.out.println("Baliza " + b.getClave() + " con Objetivo " + obj.getDescripcion());
 			b.setObjetivo(obj.getDescripcion());
+
 			try {
 				balizasRepository.save(b);
 			} catch (Exception e) {
@@ -277,6 +278,7 @@ public class ObjetivosEventHandler {
 				throw new RuntimeException(
 						"Fallo Cambiando el Estado de la Baliza: " + b.getClave() + " en Base de Datos ");
 			}
+
 			try {
 				traccar.cambiarEstado(b);
 			} catch (Exception e) {
