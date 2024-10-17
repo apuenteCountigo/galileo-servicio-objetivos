@@ -262,9 +262,10 @@ public class ObjetivosEventHandler {
 		Balizas bTmp = new Balizas();
 
 		if (obj != null && obj.getBalizas() != null) {
-			b = balizasRepository.findById(obj.getBalizas().getId()).get();
 			bTmp = balizasRepository.findById(obj.getBalizas().getId()).get();
 			entMg.detach(bTmp);
+
+			b = balizasRepository.findById(obj.getBalizas().getId()).get();
 
 			log.info("Cargando baliza Tmp: {}", bTmp.getEstados().getDescripcion());
 			long bEstado = b.getEstados().getId();
