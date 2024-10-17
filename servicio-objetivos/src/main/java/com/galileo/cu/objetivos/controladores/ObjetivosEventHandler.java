@@ -264,6 +264,8 @@ public class ObjetivosEventHandler {
 		if (obj != null && obj.getBalizas() != null) {
 			b = balizasRepository.findById(obj.getBalizas().getId()).get();
 			bTmp = balizasRepository.findById(obj.getBalizas().getId()).get();
+			entMg.detach(bTmp);
+
 			log.info("Cargando baliza Tmp: {}", bTmp.getEstados().getDescripcion());
 			long bEstado = b.getEstados().getId();
 			b.setEstados(estadosrepo.findByDescripcion("En Instalación"));
